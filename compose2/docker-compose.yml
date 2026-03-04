@@ -78,3 +78,6 @@ services:
       start_period: 30s
     depends_on:
       - database
+    mem_limit: 512m
+    cpus: 0.5
+    pids_limit: 50
