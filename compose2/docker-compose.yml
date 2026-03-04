@@ -1,0 +1,63 @@
+networks:
+  backend:
+    name: formation-backend-network
+    external: false
+  frontend:
+    name: formation-frontend-network
+
+volumes:
+  formation-db-data:
+    driver: local
+    driver_opts:
+      type: none #tmpfs nfs smb
+      device: D:\docker\data\formation_db_data
+      o: bind
+
+  formation-wp-data:
+    driver: local
+    driver_opts:
+      type: none #tmpfs nfs smb
+      device: D:\docker\data\wp_data
+      o: bind
+
+services:
+  database:
+    container_name: formation_db
+    image: mariadb:11
+    networks:
+      - backend
+    environment:
+      MARIADB_ROOT_PASSWORD: bob
+      MARIADB_USER: wp-user
+      MARIADB_PASSWORD: bob
+      MARIADB_DATABASE: wordpress
+    volumes:
+      - formation-db-data:/var/lib/mysql
+#      - D:\docker\data\formation_db_data:/var/lib/mysql
+
+  myadmin:
+    image: phpmyadmin:latest
+    container_name: formation_db_admin
+    networks:
+      - backend
+      - frontend
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: database
+
+  wordpress:
+    image: wordpress:php8.2-apache
+    container_name: formation_wordpress
+    networks:
+      - backend
+      - frontend
+    ports:
+      - "8080:80"
+    environment:
+      WORDPRESS_DB_HOST: database
+      WORDPRESS_DB_USER: wp-user
+      WORDPRESS_DB_PASSWORD: bob
+      WORDPRESS_DB_NAME: wordpress
+    volumes:
+      - formation-wp-data:/var/www/html
