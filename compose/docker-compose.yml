@@ -1,0 +1,9 @@
+services:
+  hello:
+    image: hello:v1
+    ports:
+      - "8080:80"
+  nginx:
+    image: nginx:latest
+    ports:
+      - "8081:80"
