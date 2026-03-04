@@ -10,7 +10,7 @@ volumes:
     driver: local
     driver_opts:
       type: none #tmpfs nfs smb
-      device: D:\docker\data\formation_db_data
+      device: ${VOLUME_DB_PATH}
       o: bind
 
   formation-wp-data:
@@ -28,12 +28,18 @@ services:
       - backend
     environment:
       MARIADB_ROOT_PASSWORD: bob
-      MARIADB_USER: wp-user
-      MARIADB_PASSWORD: bob
-      MARIADB_DATABASE: wordpress
+      MARIADB_USER: ${MARIADB_USER}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD}
+      MARIADB_DATABASE: ${MARIADB_DATABASE}
     volumes:
       - formation-db-data:/var/lib/mysql
 #      - D:\docker\data\formation_db_data:/var/lib/mysql
+    restart: always #no always on-failure:5 unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "mariadb-admin ping -h localhost -u ${MARIADB_USER} -p${MARIADB_PASSWORD} || exit 1"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
 
   myadmin:
     image: phpmyadmin:latest
@@ -45,6 +51,7 @@ services:
       - "8081:80"
     environment:
       PMA_HOST: database
+    
 
   wordpress:
     image: wordpress:php8.2-apache
@@ -56,8 +63,14 @@ services:
       - "8080:80"
     environment:
       WORDPRESS_DB_HOST: database
-      WORDPRESS_DB_USER: wp-user
-      WORDPRESS_DB_PASSWORD: bob
-      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DB_USER: ${MARIADB_USER}
+      WORDPRESS_DB_PASSWORD: ${MARIADB_PASSWORD}
+      WORDPRESS_DB_NAME: ${MARIADB_DATABASE}
     volumes:
       - formation-wp-data:/var/www/html
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost/index.php || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 2
+      start_period: 30s

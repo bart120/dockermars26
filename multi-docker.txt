@@ -5,3 +5,7 @@ docker run -d --name formation_db --network formation_network -e MARIADB_ROOT_PA
 docker run -d -p 8081:80 --network formation_network -e PMA_HOST=formation_db phpmyadmin:latest
 
 docker run -d --network formation_network -e WORDPRESS_DB_HOST=formation_db -e WORDPRESS_DB_NAME=wordpress -e WORDPRESS_DB_USER=root -e WORDPRESS_DB_PASSWORD=bob -v "D:\docker\data\wp_data:/var/www/html" -p 8080:80 wordpress:php8.2-apache
+
+
+
+docker exec -it {container_name} /bin/sh
