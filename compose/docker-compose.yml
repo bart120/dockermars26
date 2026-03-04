@@ -1,9 +1,16 @@
 services:
-  hello:
-    image: hello:v1
-    ports:
-      - "8080:80"
+  #hello:
+  #  image: hello:v1
+  #  ports:
+  #    - "8080:80"
   nginx:
     image: nginx:latest
     ports:
       - "8081:80"
+
+  #avec docker build
+  hello:
+    image: hello:auto-build
+    build: ../start
+    ports:
+      - "8080:80"
